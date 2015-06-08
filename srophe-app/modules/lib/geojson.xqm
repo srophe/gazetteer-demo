@@ -79,13 +79,14 @@ declare function geo:get-coordinates($geo-search as element()*, $type as xs:stri
                map{"geo-data" :=  
                 let $types := 
                     if(contains($type,',')) then 
+                    concat('(',
                         string-join(
                             for $type-string in tokenize($type,',')
-                            return concat('"',$type-string,'"'),',')
-                        else $type
-                let $path := concat("collection('",$config:data-root,"/places/tei')//tei:place[@type = (",$types,")]//tei:geo") 
-                for $rec in util:eval($path) 
-                return $rec    
+                            return concat('"',$type-string,'"'),','),')')
+                        else concat('"',$type,'"')
+                let $path := concat("collection('",$config:data-root,"/places/tei')//tei:place[@type = ",$types,"]//tei:geo") 
+                for $rec in util:eval($path)
+                return $rec   
                 }
             else  map{"geo-data" := collection($config:data-root || "/places/tei")//tei:place[@type=$type]//tei:geo} 
         else map{"geo-data" := collection($config:data-root || "/places/tei")//tei:geo} 
