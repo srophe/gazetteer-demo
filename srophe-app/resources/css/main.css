@@ -19,11 +19,11 @@ body {font-family: arial, sans-serif; padding-top:50px;}
 /* This is the background color for geo */
 #main {margin: 0 auto; padding:0; border-top:1px solid #753C28;}
 
-/* all backgrounds */
-#content {margin:auto; padding-top:2em; background-color:white;}
+/* all backgrounds  width:95%;*/
+#content {margin:auto; padding-top:2em; background-color:white; }
 .navbar {border-bottom:4px solid #753C28 !important;}
 .navbar-brand {margin-top:-.5em; padding-left:0;}
-.navbar-brand img {padding-left:0;}
+.navbar-brand img {padding-left:0 margin-left:0;}
 .navbar .advanced-search{margin-top:-.5em;}
 .navbar-form {overflow:hidden;}
 .navbar-input-group {
@@ -100,6 +100,7 @@ h4 {font-size: 1em; margin-top:1em;}
     border-bottom: 1px solid #ccc;
     
 }
+.table-constrained {table-layout: fixed; word-wrap: break-word;}
 .well-white {background-color:white;}
 .section {background-color:white; padding:0 1em;}
 .left-padding{padding-left:1em;}
