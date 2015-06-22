@@ -107,7 +107,6 @@ return feed:build-atom-feed($hits, $start, $perpage, $q, $total)
 ) 
 };
 
-
 (:~
   : Use resxq to format urls for tei
   : @param $collection syriaca.org subcollection 
@@ -128,29 +127,6 @@ function api:get-tei($collection as xs:string, $id as xs:string){
      api:get-tei-rec($collection, $id)
      )
 }; 
-
-(:~
-  : NOTE this does means the above no longer works...
-  : Use resxq to format urls for spear tei
-  : @param $collection syriaca.org subcollection 
-  : @param $id record id
-  : Serialized as XML
-
-declare 
-    %rest:GET
-    %rest:path("/spear/{$type}/{$id}/tei")
-    %output:media-type("text/xml")
-    %output:method("xml")
-function api:get-tei($type as xs:string, $id as xs:string){
-   (<rest:response> 
-      <http:response status="200"> 
-        <http:header name="Content-Type" value="application/xml; charset=utf-8"/> 
-      </http:response> 
-    </rest:response>, 
-     api:get-spear-tei($type, $id)
-     )
-}; 
-:)
 
 (:~
   : Return atom feed for single record

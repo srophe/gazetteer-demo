@@ -45,6 +45,7 @@ declare function browse:get-all($node as node(), $model as map(*), $coll as xs:s
 let $browse-path := 
         if($coll = ('persons','authors','saints')) then concat("collection('",$config:data-root,"/persons/tei')//tei:person",browse:get-pers-coll($coll),browse:get-syr()) 
     else if($coll = 'places') then concat("collection('",$config:data-root,"/places/tei')//tei:place",browse:get-syr())
+    else if($coll = 'saints-works') then concat("collection('",$config:data-root,"/works/tei')//tei:body/tei:bibl",browse:get-syr())
     else if(exists($coll)) then concat("collection('",$config:data-root,xs:anyURI($coll),"')//tei:body",browse:get-syr())
     else concat("collection('",$config:data-root,"')//tei:body",browse:get-syr())
 return 
@@ -54,10 +55,11 @@ return
 (:
 :testing xpath
 :)
-declare function browse:get-xpath($node as node(), $model as map(*), $coll as xs:string?){
+declare function browse:get-xpath($coll as xs:string?){
     (
     if($coll = ('persons','authors','saints')) then concat("collection('",$config:data-root,"/persons/tei')//tei:person",browse:get-pers-coll($coll),browse:get-syr()) 
     else if($coll = 'places') then concat("collection('",$config:data-root,"/places/tei')//tei:place",browse:get-syr())
+    else if($coll = 'saints-works') then concat("collection('",$config:data-root,"/works/tei')//tei:body/tei:bibl",browse:get-syr())
     else if(exists($coll)) then concat("collection('",$config:data-root,xs:anyURI($coll),"')//tei:body",browse:get-syr())
     else concat("collection('",$config:data-root,"')//tei:body",browse:get-syr()),
     concat(' ',$coll)
@@ -113,7 +115,7 @@ declare function browse:get-sort(){
  : @param $titlestring 
  :)
 declare function browse:build-sort-string($titlestring as xs:string*) as xs:string* {
-    replace(replace(replace($titlestring,'^\s+',''),'^al-',''),'[‘ʻʿ]','')
+    replace(replace(replace(replace($titlestring,'^\s+',''),'^al-',''),'[‘ʻʿ]',''),'On ','')
 };
 
 (:
@@ -181,7 +183,7 @@ let $data :=
         else ()    
     else if($browse:view = 'map') then $model("browse-data")
     else if($browse:view = 'syr') then $model("browse-data")/self::*[matches($browse:sort, substring(string-join(descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/descendant-or-self::*/text(),' '),1,1))]
-    else $model("browse-data")/self::*[matches(browse:get-sort(), substring(browse:build-sort-string(string-join(descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/descendant-or-self::*/text(),' ')),1,1))]
+    else $model("browse-data")/self::*[matches(browse:get-sort(), substring(browse:build-sort-string(string-join(descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/descendant-or-self::text(),' ')),1,1))]
 return
     map{"browse-refine" := $data}
 };
@@ -203,15 +205,13 @@ declare function browse:get-data($node as node(), $model as map(*),$coll){
     let $en-title := 
              if($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*) then 
                  string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*/text(),' ')
-             else if(not($data/child::*[@syriaca-tags='#syriaca-headword'])) then 
-               $data/ancestor::tei:TEI/descendant::tei:title[1]/text()
-             else string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text(),' ')  
+             else if(string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text())) then 
+                string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text(),' ')   
+             else $data/ancestor::tei:TEI/descendant::tei:title[1]/text()               
     let $syr-title := 
              if($data/child::*[@syriaca-tags='#syriaca-headword'][1]/child::*) then
                  string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/child::*/text(),' ')
-             else if(not($data/child::*[@syriaca-tags='#syriaca-headword'])) then 
-               'NA'    
-             else string-join($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/text(),' ')  
+             else 'NA'  
     let $title := 
              if($browse:view = 'syr') then $syr-title else $en-title
     let $browse-title := browse:build-sort-string($title)
@@ -295,29 +295,26 @@ else '0100-01-01'
 :)
 declare function browse:format-list-items($en-title,$syr-title, $type, $uri, $desc, $dates){
 <li class="results-list">
-{(
-    if($browse:view = 'syr') then
-        <a href="{replace($uri,'http://syriaca.org/','/')}">
-            <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi> - 
-            <bdi dir="ltr" lang="en" xml:lang="en">{($en-title, 
-              if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')') 
-              else ())}
-            </bdi>    
-        </a>
-    else    
-        <a href="{replace($uri,'http://syriaca.org/','/')}">
-            {($en-title, 
-            if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')')
-            else () )}  
-            {
-            if($syr-title != '') then 
-            if($syr-title = 'NA') then ()
-            else
-            (' - ',
-            <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi>)
-            else ' - [Syriac Not Available]'}
-        </a>,
-    if($desc != '') then <span class="results-list-desc" dir="ltr" lang="en">{$desc}</span> else())}
+   <a href="{replace($uri,'http://syriaca.org/','/exist/apps/srophe/')}">
+    {(
+        if($browse:view = 'syr') then
+                (
+                <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi>, ' - ',
+                <bdi dir="ltr" lang="en" xml:lang="en">{($en-title, 
+                  if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')') 
+                  else ())}
+                </bdi>)    
+        else    
+            ($en-title, 
+                if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')')
+                else (),  
+                if($syr-title != '') then 
+                    if($syr-title = 'NA') then ()
+                    else (' - ', <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi>)
+                else ' - [Syriac Not Available]')
+                )}   
+       </a>
+    {if($desc != '') then <span class="results-list-desc" dir="ltr" lang="en">{$desc}</span> else()}
 </li>
 };
 

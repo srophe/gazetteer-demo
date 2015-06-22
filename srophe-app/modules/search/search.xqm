@@ -242,18 +242,50 @@ declare %templates:wrap  function search:show-form($node as node()*, $model as m
 };
 
 (:~
- : Generic search output   
+ : Generic search output
+ : Formats English and Syriac headwords if available
+ : Uses tei:teiHeader//tei:title if no headwords.
+ : Should handle all data types, and eliminate the need for 
+ : data type specific display functions eg: persons:saints-results-node()
 :)
 declare function search:results-node($hit){
-    let $root := $hit    
-    let $title := $root/ancestor::tei:TEI/descendant::tei:teiHeader/descendant::tei:title
+    let $data := $hit  
+    let $type := if($data/descendant::tei:person/@ana) then replace($data/descendant::tei:person/@ana,'#syriaca-',' ') else if($data/descendant::tei:place/@type) then string($data/descendant::tei:place/@type) else ()
     let $id := 
         if($hit//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')]) then
-                string($hit//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')][1])
-        else string($hit//tei:div[1]/@uri)    
+                string(replace($hit//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')][1],'/tei',''))
+        else string($hit//tei:div[1]/@uri)
+    let $en-title := 
+             if($data/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]) then
+                if($data/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*) then 
+                    string-join($data/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*/text(),' ')
+                else string($data/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text())  
+             else ()
+    let $syr-title := 
+             if($data/descendant::*[@syriaca-tags='#syriaca-headword'][1]) then
+                if($data/descendant::*[@syriaca-tags='#syriaca-headword'][1]/child::*) then
+                 string-join($data/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/child::*/text(),' ')
+                else string($data/child::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/text())   
+             else 'NA'
+    let $birth := if($data/descendant::*/@ana) then $data/descendant::tei:birth else()
+    let $death := if($data/descendant::*/@ana) then $data/descendant::tei:death else()
+    let $dates := concat(if($birth) then $birth/text() else(), if($birth and $death) then ' - ' else if($death) then 'd.' else(), if($death) then $death/text() else())
+    let $title := 
+            if($en-title) then 
+                <a href="{replace($id,'http://syriaca.org/','/')}">
+                    {($en-title, 
+                        if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')')
+                        else () )}  
+                    {
+                        if($syr-title != '') then 
+                           if($syr-title = 'NA') then ()
+                           else (' - ', <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi>)
+                        else ' - [Syriac Not Available]'}
+                </a>
+            else <a href="{replace($id,'http://syriaca.org/','/')}">{$data/ancestor::tei:TEI/descendant::tei:teiHeader/descendant::tei:title}</a>    
     return
         <p style="font-weight:bold padding:.5em;">
-            <a href="{$id}">{app:tei2html($title)}</a>
+           {$title}
         </p>
 };
 
@@ -268,22 +300,19 @@ function search:show-hits($node as node()*, $model as map(*), $collection as xs:
 {
     for $hit at $p in subsequence($model("hits"), $search:start, 20)
     return
-        <div class="row results-list" xmlns="http://www.w3.org/1999/xhtml">
+        <div class="row" xmlns="http://www.w3.org/1999/xhtml" style="border-bottom:1px dotted #eee; padding-top:.5em">
             <div class="col-md-10 col-md-offset-1">
                 <div class="result">
                   <div class="col-md-1" style="margin-right:-1em;">
                     <span class="label label-default">{$search:start + $p - 1}</span>
                   </div>
-                  <div class="col-md-9"> 
-                    {
-                    if($collection = 'persons') then persons:results-node($hit)
-                    else if($collection = 'saints') then persons:saints-results-node($hit)
-                    else if($collection = 'places') then places:results-node($hit)
-                    else if($collection ='spear') then spears:results-node($hit)
-                    else if($collection ='manuscripts') then ms:results-node($hit)
-                    else search:results-node($hit)} 
-                    <div style="margin-bottom:1em; margin-top:-1em; padding-left:1em;">
-                        {if($hit/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) then common:truncate-sentance($hit/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) else ()}
+                  <div class="col-md-9" xml:lang="en"> 
+                    {search:results-node($hit)} 
+                    <div>
+                        {
+                        if($hit/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) then 
+                            <span class="results-list-desc" dir="ltr" lang="en">{common:truncate-sentance($hit/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text())}</span> 
+                        else()}
                     </div>
                   </div>
                 </div>

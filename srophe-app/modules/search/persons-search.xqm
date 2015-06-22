@@ -187,6 +187,11 @@ else
          else '' 
 }; 
 
+declare function persons:date-range2(){
+if($persons:date-type != '') then ''
+    
+else ''
+};
 (:~
  : Search related places 
 :)
@@ -315,7 +320,7 @@ declare function persons:results-node($hit){
     let $id := substring-after($root/@xml:id,'-')                  
     return
         <p style="font-weight:bold padding:.5em;">
-            <a href="/person/{$id}">
+            <a href="/exist/apps/srophe/person/{$id}">
                 <bdi dir="ltr" lang="en" xml:lang="en">{$title-en}</bdi>
                 {$type, $title-syr}
             </a>
@@ -341,7 +346,7 @@ declare function persons:saints-results-node($hit){
     let $id := substring-after($root/@xml:id,'-')                  
     return
         <p style="font-weight:bold padding:.5em;">
-            <a href="/saint/{$id}">
+            <a href="/exist/apps/srophe/person/{$id}">
                 <bdi dir="ltr" lang="en" xml:lang="en">{$title-en}</bdi>
                 {$type, $title-syr}
             </a>
