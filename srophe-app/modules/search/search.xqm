@@ -31,8 +31,7 @@ declare variable $search:collection {request:get-parameter('collection', '') cas
 declare %templates:wrap function search:get-results($node as node(), $model as map(*), $collection as xs:string?){
     let $coll := if($search:collection != '') then $search:collection else $collection
     let $eval-string := 
-                        if($coll = 'persons') then persons:query-string()
-                        else if($coll ='saints') then persons:saints-query-string()
+                        if($coll = 'persons' or 'authors' or 'saints') then persons:query-string($coll)
                         else if($coll ='spear') then spears:query-string()
                         else if($coll = 'places') then places:query-string()
                         else if($coll = 'manuscripts') then ms:query-string()
@@ -78,9 +77,10 @@ return $query-string
  : @param $collection passed from search page templates
 :)
 declare function search:search-string($collection as xs:string?){
-    if($collection = 'persons') then persons:search-string()
+    if($collection = 'persons' or 'authors' or 'saints') then persons:search-string()
     else if($collection ='spear') then spears:search-string()
-    else places:search-string()
+    else if($collection ='places') then places:search-string()
+    else search:query-string($collection)
 };
 
 declare %templates:wrap function search:spear-facets($node as node(), $model as map(*)){
@@ -234,8 +234,7 @@ return
 declare %templates:wrap  function search:show-form($node as node()*, $model as map(*), $collection as xs:string?) {   
     if(exists(request:get-parameter-names())) then ''
     else 
-        if($collection = 'persons') then <div>{persons:search-form('person')}</div>
-        else if($collection = 'saints') then <div>{persons:search-form('saint')}</div>
+        if($collection = 'persons' or 'authors' or 'saints') then <div>{persons:search-form($collection)}</div>
         else if($collection ='spear') then <div>{spears:search-form()}</div>
         else if($collection ='manuscripts') then <div>{ms:search-form()}</div>
         else <div>{places:search-form()}</div>
@@ -272,7 +271,11 @@ declare function search:results-node($hit){
     let $dates := concat(if($birth) then $birth/text() else(), if($birth and $death) then ' - ' else if($death) then 'd.' else(), if($death) then $death/text() else())
     let $title := 
             if($en-title) then 
+<<<<<<< HEAD
                 <a href="{replace($id,'http://syriaca.org/','/')}">
+=======
+                <a href="{replace($id,'http://syriaca.org/','/exist/apps/srophe/')}">
+>>>>>>> issue348
                     {($en-title, 
                         if($type != '') then concat('(',$type, if($dates) then ', ' else(), $dates ,')')
                         else () )}  
