@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="xar" name="srophe">
-    <property name="project.version" value="1.43"/>
-    <property name="project.app" value="srophe"/>
+    <property name="project.version" value="0.1"/>
+    <property name="project.app" value="geo"/>
     <property name="build.dir" value="build"/>
     <target name="xar">
         <mkdir dir="${build.dir}"/>

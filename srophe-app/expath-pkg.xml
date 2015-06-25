@@ -2,7 +2,7 @@
 <package xmlns="http://expath.org/ns/pkg" name="http://syriaca.org/geo" abbrev="geo" version=".1" spec="1.0">
     <title>Syriaca.org Gazetteer</title>
     <!-- TEI data -->
-    <dependency package="http://syriaca.org/geo-data"/>
+    <dependency package="http://syriaca.org/srophe-data"/>
     <!-- eXist shared resources -->
     <dependency package="http://exist-db.org/apps/shared"/>
     <!-- JSON Parser and Serializer for XQuery -->
