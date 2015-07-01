@@ -2,13 +2,9 @@ xquery version "3.0";
 
 module namespace search="http://syriaca.org//search";
 import module namespace facets="http://syriaca.org//facets" at "../lib/facets.xqm";
-import module namespace app="http://syriaca.org//templates" at "../app.xql";
-import module namespace persons="http://syriaca.org//persons" at "persons-search.xqm";
-import module namespace places="http://syriaca.org//places" at "places-search.xqm";
-import module namespace spears="http://syriaca.org//spears" at "spear-search.xqm";
-import module namespace ms="http://syriaca.org//ms" at "ms-search.xqm";
-import module namespace common="http://syriaca.org//common" at "common.xqm";
 import module namespace geo="http://syriaca.org//geojson" at "../lib/geojson.xqm";
+import module namespace common="http://syriaca.org//common" at "common.xqm";
+import module namespace places="http://syriaca.org//places" at "places-search.xqm";
 
 import module namespace templates="http://exist-db.org/xquery/templates" ;
 import module namespace config="http://syriaca.org//config" at "../config.xqm";
@@ -30,12 +26,7 @@ declare variable $search:collection {request:get-parameter('collection', '') cas
 :)
 declare %templates:wrap function search:get-results($node as node(), $model as map(*), $collection as xs:string?){
     let $coll := if($search:collection != '') then $search:collection else $collection
-    let $eval-string := 
-                        if($coll = 'persons' or 'authors' or 'saints') then persons:query-string($coll)
-                        else if($coll ='spear') then spears:query-string()
-                        else if($coll = 'places') then places:query-string()
-                        else if($coll = 'manuscripts') then ms:query-string()
-                        else search:query-string($collection)
+    let $eval-string := places:query-string()
     return                         
     map {"hits" := 
                 let $hits := util:eval($eval-string)    
@@ -51,9 +42,7 @@ declare %templates:wrap function search:get-results($node as node(), $model as m
 declare function search:query-string($collection as xs:string?) as xs:string?{
 concat("collection('",$config:data-root,$collection,"')//tei:body",
     places:keyword(),
-    places:place-name(),
-    persons:name()
-    )
+    places:place-name())
 };
 
 declare function search:search-api($q,$place,$person){
@@ -77,10 +66,7 @@ return $query-string
  : @param $collection passed from search page templates
 :)
 declare function search:search-string($collection as xs:string?){
-    if($collection = 'persons' or 'authors' or 'saints') then persons:search-string()
-    else if($collection ='spear') then spears:search-string()
-    else if($collection ='places') then places:search-string()
-    else search:query-string($collection)
+    places:search-string()
 };
 
 declare %templates:wrap function search:spear-facets($node as node(), $model as map(*)){
@@ -132,7 +118,6 @@ let $pagination-links :=
             <div class="col-sm-5">
             <h4 class="hit-count">Search results:</h4>
                 <p class="col-md-offset-1 hit-count">{$total-result-count} matches for {search:search-string($collection)}.</p>
-                <!-- for debugging xpath <br/>{persons:query-string()}-->
             </div>
             {if(search:hit-count($node, $model) gt $perpage) then 
               <div class="col-md-7">
@@ -233,11 +218,7 @@ return
 :)
 declare %templates:wrap  function search:show-form($node as node()*, $model as map(*), $collection as xs:string?) {   
     if(exists(request:get-parameter-names())) then ''
-    else 
-        if($collection = 'persons' or 'authors' or 'saints') then <div>{persons:search-form($collection)}</div>
-        else if($collection ='spear') then <div>{spears:search-form()}</div>
-        else if($collection ='manuscripts') then <div>{ms:search-form()}</div>
-        else <div>{places:search-form()}</div>
+    else <div>{places:search-form()}</div>
 };
 
 (:~
@@ -245,7 +226,6 @@ declare %templates:wrap  function search:show-form($node as node()*, $model as m
  : Formats English and Syriac headwords if available
  : Uses tei:teiHeader//tei:title if no headwords.
  : Should handle all data types, and eliminate the need for 
- : data type specific display functions eg: persons:saints-results-node()
 :)
 declare function search:results-node($hit){
     let $data := $hit  
