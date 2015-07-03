@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:s="http://syriaca.org" xmlns:saxon="http://saxon.sf.net/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:local="http://syriaca.org/ns" xmlns:x="http://www.w3.org/1999/xhtml" exclude-result-prefixes="xs t s saxon" version="2.0">
+<xsl:stylesheet xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:s="http://syriaca.org" xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:x="http://www.w3.org/1999/xhtml" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:saxon="http://saxon.sf.net/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:local="http://syriaca.org/ns" exclude-result-prefixes="xs t s saxon" version="2.0">
 
  <!-- ================================================================== 
        Copyright 2013 New York University
@@ -424,9 +424,7 @@
                 </h3>
                 <ul>
                     <xsl:for-each select="current-group()">
-                        <li>
-                            <xsl:apply-templates select="self::*"/>
-                        </li>
+                        <xsl:apply-templates select="self::*"/>
                     </xsl:for-each>
                 </ul>
             </xsl:for-each-group>
@@ -1161,6 +1159,9 @@
         <!-- Works through the tree structure in the confessions.xml to output only the relevant confessions -->
         <xsl:for-each select="t:confessions/descendant::t:list[1]">
             <ul>
+                <li>
+                    <xsl:value-of select="$current-confessions"/>
+                </li>
                 <!-- Checks for top level confessions that may have a match or a descendant with a match, supresses any that do not -->
                 <xsl:if test="descendant-or-self::t:item[contains($current-confessions,@xml:id)]">
                     <!-- Goes through each item to check for a match or a child match -->
