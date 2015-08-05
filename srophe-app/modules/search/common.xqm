@@ -3,19 +3,13 @@ xquery version "3.0";
  : Shared functions for search modules 
  :)
 module namespace common="http://syriaca.org//common";
+import module namespace app="http://syriaca.org//templates" at "../app.xql";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (:~
  : Cleans search parameters to replace bad/undesirable data in strings
  : @param-string parameter string to be cleaned
  : NOTE to self: Need to handle ' in full text search, currently stripped before sent to ft:query() function
- due to difficulties with util:eval;
-replace(replace($param-string, "^\*", ""),"'",'"')     
-replace(replace($param-string, "(^|\W\*)|(^|\W\?)|[&amp;!@#$%^+=_]:", ""),"'",'"')
- replace(replace($text, '&amp;', '&amp;amp;'), '''', '&amp;apos;')
- replace(replace($param-string, "(^|\W\*)|(^|\W\?)|[&amp;!@#$%^+=_]:", ""),"'","")
- 
- 
  :
 :)
 declare function common:clean-string($param-string){
@@ -89,10 +83,12 @@ return $final-date
  : Function to truncate description text after first 12 words
  : @param $string
 :)
-declare function common:truncate-sentance($sentance as xs:string*) as xs:string? {
-let $string := string-join($sentance, ' ')
+declare function common:truncate-string($str as xs:string*) as xs:string? {
+let $string := string-join($str, ' ')
 return 
-    if(count(tokenize($string, '\W+')[. != '']) gt 12) then concat(string-join(for $word in tokenize($string, '\W+')[position() lt 12] return $word, ' '),'...')
+    if(count(tokenize($string, '\W+')[. != '']) gt 12) then 
+        let $last-words := tokenize($string, '\W+')[position() = 14]
+        return concat(substring-before($string, $last-words),'...')
     else $string
 };
 
@@ -104,8 +100,8 @@ return
  : @param $node search/browse hits should be either tei:person, tei:place, or tei:body
  : Used by search.xqm and browse.xqm
 :)
-declare function common:display-recs-short-view($node) as node()*{
-let $ana := if($node/descendant-or-self::tei:person/@ana) then replace($node/descendant-or-self::tei:person/@ana,'#syriaca-',' ') else ()
+declare function common:display-recs-short-view($node, $lang) as node()*{
+let $ana := if($node/descendant-or-self::tei:person/@ana) then replace($node/descendant-or-self::tei:person/@ana,'#syriaca-','') else ()
 let $type := if($node/descendant-or-self::tei:place/@type) then string($node/descendant-or-self::tei:place/@type) else ()
 let $uri := 
         if($node//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')]) then
@@ -128,21 +124,39 @@ let $death := if($ana) then $node/descendant::tei:death else()
 let $dates := concat(if($birth) then $birth/text() else(), if($birth and $death) then ' - ' else if($death) then 'd.' else(), if($death) then $death/text() else())    
 let $desc :=
         if($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) then
-            common:truncate-sentance($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text())
+            common:truncate-string($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text())
         else ()
 return
     <p class="results-list">
        <a href="{replace($uri,'http://syriaca.org/','/exist/apps/srophe/')}">
-        {($en-title,
+        {
+        if($lang = 'syr') then
+            (<span dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</span>,' - ', $en-title,
+            if($type) then concat('(',$type,')') else ())
+        else
+        ($en-title,
           if($type) then concat('(',$type,')') else (),
-          if($syr-title) then 
-            if($syr-title = 'NA') then ()
-            else (' - ', <bdi dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</bdi>)
-          else ' - [Syriac Not Available]')}   
+            if($syr-title) then 
+                if($syr-title = 'NA') then ()
+                else (' - ', <span dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</span>)
+          else ' - [Syriac Not Available]')
+          }   
        </a>
        {if($ana) then
             <span class="results-list-desc" dir="ltr" lang="en">{concat('(',$ana, if($dates) then ', ' else(), $dates ,')')}</span>
         else ()}
-     <span class="results-list-desc" dir="ltr" lang="en">{concat($desc,' ')}<span class="srp-label">URI: </span><a href="{$uri}">{$uri}</a></span>
+     <span class="results-list-desc" dir="ltr" lang="en">{concat($desc,' ')}</span>
+     {
+        if($ana) then 
+            <span class="results-list-desc" dir="ltr" lang="en">Names: 
+            {
+                for $names in $node/descendant-or-self::tei:person/tei:persName[not(@syriaca-tags='#syriaca-headword')]
+                [not(starts-with(@xml:lang,'syr'))][not(starts-with(@xml:lang,'ar'))][not(@xml:lang ='en-xsrp1')]
+                return <span class="pers-label badge">{app:tei2html($names)}</span>
+            }
+            </span>
+        else()
+        }
+     <span class="results-list-desc"><span class="srp-label">URI: </span><a href="{$uri}">{$uri}</a></span>
     </p>
 };
