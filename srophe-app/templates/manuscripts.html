@@ -11,13 +11,13 @@
         <meta name="DC.type" property="dc.type" content="Text"/>
         <meta name="DC.isPartOf" property="dc.ispartof" content="A Digital Catalogue of Syriac Manuscripts in the British Library"/>
         <meta name="DC.isPartOf" property="dc.ispartof" content="Syriaca.org: The Syriac Reference Portal"/>
-        <link rel="shortcut icon" href="/exist/apps/srophe/resources/img/syriaca.ico"/>
-        <link rel="stylesheet" type="text/css" href="/exist/apps/srophe/resources/css/bootstrap.min.css"/>
-        <link rel="stylesheet" type="text/css" href="/exist/apps/srophe/resources/css/main.css"/>
-        <link rel="stylesheet" type="text/css" href="/exist/apps/srophe/resources/css/manuscripts.css"/>
-        <link rel="stylesheet" type="text/css" media="print" href="/exist/apps/srophe/resources/css/print.css"/>
+        <link rel="shortcut icon" href="$app-root/resources/img/syriaca.ico"/>
+        <link rel="stylesheet" type="text/css" href="$app-root/resources/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="$app-root/resources/css/main.css"/>
+        <link rel="stylesheet" type="text/css" href="$app-root/resources/css/manuscripts.css"/>
+        <link rel="stylesheet" type="text/css" media="print" href="$app-root/resources/css/print.css"/>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css"/>
-        <link rel="stylesheet" href="/exist/apps/srophe/resources/leaflet/leaflet.awesome-markers.css"/>
+        <link rel="stylesheet" href="$app-root/resources/leaflet/leaflet.awesome-markers.css"/>
         <!-- temporary until migrate to bootstrap 3.0 -->
         <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js?2"/>
         <script src="http://isawnyu.github.com/awld-js/lib/requirejs/require.min.js" type="text/javascript"/>
@@ -58,7 +58,11 @@
                                 </li>
                                 <li role="presentation" class="divider"/>
                                 <li>
-                                    <a href="/q/index.html" class="saints-sm-icon nav-icons">Saints</a>
+                                    <a href="/authors/index.html" class="authors-sm-icon nav-icons">Authors</a>
+                                </li>
+                                <li role="presentation" class="divider"/>
+                                <li>
+                                    <a href="/saints/index.html" class="saints-sm-icon nav-icons">Saints</a>
                                 </li>
                                 <li role="presentation" class="divider"/>
                                 <li>
@@ -117,9 +121,9 @@
         </footer>
         
         <!-- Additional Javascript -->
-        <script type="text/javascript" src="/exist/apps/srophe/resources/js/bootstrap.min.js"/>
-        <script type="text/javascript" src="/exist/apps/srophe/resources/js/jquery.validate.min.js"/>
-        <script type="text/javascript" src="/exist/apps/srophe/resources/js/main.js"/>
+        <script type="text/javascript" src="$app-root/resources/js/bootstrap.min.js"/>
+        <script type="text/javascript" src="$app-root/resources/js/jquery.validate.min.js"/>
+        <script type="text/javascript" src="$app-root/resources/js/main.js"/>
         <script>
             var _gaq=[['_setAccount',''],['_trackPageview']];
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
