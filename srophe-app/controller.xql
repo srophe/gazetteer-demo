@@ -5,7 +5,6 @@ declare variable $exist:resource external;
 declare variable $exist:controller external;
 declare variable $exist:prefix external;
 declare variable $exist:root external;
-import module namespace login="http://exist-db.org/xquery/login" at "resource:org/exist/xquery/modules/persistentlogin/login.xql";
 
 declare variable $syriaca-root := concat($exist:root,'/exist/apps/srophe/');
 

@@ -3,15 +3,14 @@
  :)
 xquery version "3.0";
 
-module namespace spear="http://syriaca.org//spear";
+module namespace spear="http://syriaca.org/spear";
 
-import module namespace facets="http://syriaca.org//facets" at "lib/facets.xqm";
-import module namespace app="http://syriaca.org//templates" at "app.xql";
 import module namespace templates="http://exist-db.org/xquery/templates" ;
-import module namespace config="http://syriaca.org//config" at "config.xqm";
-import module namespace geo="http://syriaca.org//geojson" at "lib/geojson.xqm";
 
-import module namespace timeline="http://syriaca.org//timeline" at "lib/timeline.xqm";
+import module namespace facets="http://syriaca.org/facets" at "lib/facets.xqm";
+import module namespace global="http://syriaca.org/global" at "lib/global.xqm";
+import module namespace geo="http://syriaca.org/geojson" at "lib/geojson.xqm";
+import module namespace timeline="http://syriaca.org/timeline" at "lib/timeline.xqm";
 
 declare namespace xslt="http://exist-db.org/xquery/transform";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -38,13 +37,13 @@ else 'all-events'
 declare function spear:build-doc-path(){ 
 if($spear:id != '') then 
     if(starts-with($spear:id,'http://syriaca.org/spear/')) then
-       collection($config:data-root || "/spear/tei")//tei:div[@uri = $spear:id]
-    else collection($config:data-root || "/spear/tei")//tei:div[descendant::*[@ref=$spear:id]]
-else if($spear:view = 'person') then collection($config:data-root || "/spear/tei")//tei:persName
-else if($spear:view = 'place') then collection($config:data-root || "/spear/tei")//tei:placeName
-else if($spear:view = 'event') then collection($config:data-root || "/spear/tei")//tei:div[tei:listEvent]
-else if($spear:view = 'all') then collection($config:data-root || "/spear/tei")//tei:div
-else util:eval(concat("collection('",$config:data-root,"/spear/tei')//tei:div",facets:facet-filter()))
+       collection($global:data-root || "/spear/tei")//tei:div[@uri = $spear:id]
+    else collection($global:data-root || "/spear/tei")//tei:div[descendant::*[@ref=$spear:id]]
+else if($spear:view = 'person') then collection($global:data-root || "/spear/tei")//tei:persName
+else if($spear:view = 'place') then collection($global:data-root || "/spear/tei")//tei:placeName
+else if($spear:view = 'event') then collection($global:data-root || "/spear/tei")//tei:div[tei:listEvent]
+else if($spear:view = 'all') then collection($global:data-root || "/spear/tei")//tei:div
+else util:eval(concat("collection('",$global:data-root,"/spear/tei')//tei:div",facets:facet-filter()))
 };
 
 (:~
@@ -74,7 +73,7 @@ declare %templates:wrap function spear:uri($node as node(), $model as map(*)){
 declare function spear:get-tei($id as xs:string){
     <tei:TEI xmlns="http://www.tei-c.org/ns/1.0">
         {
-            for $rec in collection($config:data-root || "/spear/tei")//tei:div[@uri = $spear:id]
+            for $rec in collection($global:data-root || "/spear/tei")//tei:div[@uri = $spear:id]
             return $rec
         }
     </tei:TEI>
@@ -85,7 +84,7 @@ declare function spear:get-tei($id as xs:string){
  : @param $spear:id 
 :)
 declare function spear:canonical-rec(){
-    collection($config:data-root)//tei:idno[. = $spear:id]
+    collection($global:data-root)//tei:idno[. = $spear:id]
 };
 
 (:~
@@ -104,7 +103,7 @@ declare %templates:wrap function spear:h1($node as node(), $model as map(*)){
         else if($data/tei:listEvent) then 'Event'
         else $data/tei:listPerson/descendant::tei:persName[1] | $data/descendant::tei:placeName[1]
     let $id := <idno xmlns="http://www.tei-c.org/ns/1.0">{$spear:id}</idno>
-    return app:tei2html(
+    return global:tei2html(
                         <srophe-title xmlns="http://www.tei-c.org/ns/1.0">
                             {$title, $id}
                         </srophe-title>)
@@ -198,7 +197,7 @@ declare function spear:related-rec($node as node(), $model as map(*)){
                                         <ul>
                                         {
                                             for $location in $data//tei:location
-                                            return app:tei2html($location)
+                                            return global:tei2html($location)
                                         }
                                         </ul>
                                     </div>
@@ -207,7 +206,7 @@ declare function spear:related-rec($node as node(), $model as map(*)){
                         </div>    
                     </div>
                 else (),
-                app:tei2html($abstract)
+                global:tei2html($abstract)
                 )
                 }
                <p><hr/>View full entry in <a href="{$spear:id}">{if(contains($spear:id,'person')) then 'Persons database' else 'The Syriac Gazetteer' }</a></p>
@@ -222,7 +221,7 @@ if($spear:item-type = 'person-factoid' and $model("spear-data")//tei:listPerson/
     for $persName in $model("spear-data")//tei:listPerson/tei:person/tei:persName
     return 
         if($persName/text() or $persName/child::*) then
-            <span dir="ltr" class="label label-default pers-label">{app:tei2html($persName)}</span>
+            <span dir="ltr" class="label label-default pers-label">{global:tei2html($persName)}</span>
         else ()   
     }
     </div>
@@ -260,7 +259,7 @@ let $data := $model("spear-data")
                                   $data//tei:floruit[@when] | $data//tei:floruit[@notBefore]| $data//tei:floruit[@notAfter] 
                                   | $data//tei:state[@when] | $data//tei:state[@notBefore] | $data//tei:state[@notAfter] | $data//tei:state[@from] | $data//tei:state[@to]
                                   return 
-                                     <li>{app:tei2html($date)}</li>
+                                     <li>{global:tei2html($date)}</li>
                                  }
                              </ul>
                          </div>
@@ -309,7 +308,7 @@ else ()
 declare %templates:wrap function spear:data($node as node(), $model as map(*)){
 let $data := $model("spear-data")
 return
-app:tei2html(
+global:tei2html(
     <factoid xmlns="http://www.tei-c.org/ns/1.0" type="{$spear:item-type}">
         {
          if($spear:item-type = 'event-factoid') then $data
@@ -327,7 +326,7 @@ return
             {
                 for $date in $data//tei:birth | $data//tei:death | $data//tei:floruit | $data//tei:state[@when or @notBefore or @notAfter or @to or @from]
                 return 
-                    <li>{app:tei2html($date)}</li>
+                    <li>{global:tei2html($date)}</li>
                 }
             </ul>
         )
@@ -341,12 +340,12 @@ declare %templates:wrap function spear:bibl($node as node(), $model as map(*)){
 let $sources := $model("spear-data")[1]
 let $bibl := $sources/descendant::tei:bibl
 let $back-info := $sources/ancestor::tei:text/tei:back
-return app:tei2html(<spear xmlns="http://www.tei-c.org/ns/1.0">{($bibl, $back-info)}</spear>)
+return global:tei2html(<spear xmlns="http://www.tei-c.org/ns/1.0">{($bibl, $back-info)}</spear>)
 };
 
 declare %templates:wrap function spear:citation($node as node(), $model as map(*)){
 let $citation := $model("spear-data")[1]
-return app:tei2html($citation)
+return global:tei2html($citation)
 }; 
 
 declare function spear:events($node as node(), $model as map(*)){
@@ -377,7 +376,7 @@ declare function spear:events($node as node(), $model as map(*)){
                     {
                         for $e in $event
                         return 
-                         <li class="md-line-height">{app:tei2html($e)} 
+                         <li class="md-line-height">{global:tei2html($e)} 
                             {
                             if($spear:item-type != 'event-factoid') then 
                                 <a href="factoid.html?id={string($e/ancestor::tei:div/@uri)}">
@@ -398,7 +397,7 @@ declare function spear:events($node as node(), $model as map(*)){
             for $e in $data//tei:event
             (:for $e in $event//tei:desc:)
             return 
-            <li class="md-line-height">{app:tei2html($e)} 
+            <li class="md-line-height">{global:tei2html($e)} 
                 {
                 if($spear:item-type != 'event-factoid') then 
                     <a href="factoid.html?id={string($e/ancestor::tei:div/@uri)}">
@@ -422,7 +421,7 @@ let $links:=
             {$data//tei:person//tei:idno, $data//tei:person//tei:location}
         </see-also>
    </spear>
-return app:tei2html($links)
+return global:tei2html($links)
 };
 
 (:
@@ -476,7 +475,7 @@ if($spear:view = 'person') then
             {
                 for $data in $model('spear-data')
                 let $id := normalize-space($data[1]/@ref)
-                let $connical := collection($config:data-root)//tei:idno[. = $id]
+                let $connical := collection($global:data-root)//tei:idno[. = $id]
                 let $name := if($connical) then $connical/ancestor::tei:body/descendant::*[@syriaca-tags="#syriaca-headword"][@xml:lang='en'][1]
                              else tokenize($id,'/')[last()]
                 group by $person := $name
@@ -625,7 +624,7 @@ else
             {
                 for $data in $model('spear-data')
                 let $id := normalize-space($data[1]/@ref)
-                let $connical := collection($config:data-root)//tei:idno[. = $id]
+                let $connical := collection($global:data-root)//tei:idno[. = $id]
                 let $name := if($connical) then $connical/ancestor::tei:body/descendant::*[@syriaca-tags="#syriaca-headword"][@xml:lang='en'][1]
                              else tokenize($id,'/')[last()]
                 group by $place := $name

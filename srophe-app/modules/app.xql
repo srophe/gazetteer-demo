@@ -1,48 +1,70 @@
 xquery version "3.0";
 
-module namespace app="http://syriaca.org//templates";
-(:~          
- : General use xqueries for accross srophe app.
-:)
-import module namespace teiDocs="http://syriaca.org//teiDocs" at "teiDocs/teiDocs.xqm";
+module namespace app="http://syriaca.org/templates";
 
 import module namespace templates="http://exist-db.org/xquery/templates" ;
-import module namespace config="http://syriaca.org//config" at "config.xqm";
+import module namespace teiDocs="http://syriaca.org/teiDocs" at "teiDocs/teiDocs.xqm";
+import module namespace global="http://syriaca.org/global" at "lib/global.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace xlink = "http://www.w3.org/1999/xlink";
 
+(:~
+ : Syriaca.org URI for retrieving TEI records 
+:)
 declare variable $app:id {request:get-parameter('id', '')}; 
 
 (:~ 
  : Simple get record function, retrieves tei record based on idno
+ : @param $app:id syriaca.org uri 
 :)
-declare function app:get-rec($node as node(), $model as map(*)) {
-    map {"data" := collection($config:data-root)//tei:idno[@type='URI'][. = $app:id]}
-};
-
-(:~ 
- : Simple get record function, retrieves tei record based on idno 
-:)
-declare %templates:wrap function app:rec-display($node as node(), $model as map(*)){
-    app:tei2html($model("data")/ancestor::tei:TEI)
+declare function app:get-rec($node as node(), $model as map(*), $coll as xs:string?) {
+if($app:id) then 
+    let $id :=
+        if(contains(request:get-uri(),'http://syriaca.org/')) then $app:id
+        else if($coll = 'places') then concat('http://syriaca.org/place/',$app:id) 
+        else if(($coll = 'persons') or ($coll = 'saints') or ($coll = 'authors')) then concat('http://syriaca.org/person/',$app:id)
+        else if($coll = 'bhse') then concat('http://syriaca.org/work/',$app:id)
+        else if($coll = 'spear') then concat('http://syriaca.org/spear/',$app:id)
+        else if($coll = 'mss') then concat('http://syriaca.org/manuscript/',$app:id)
+        else $app:id
+    return map {"data" := collection($global:data-root)//tei:idno[@type='URI'][. = $id]}
+else map {"data" := 'Page data'}    
 };
 
 (:~
- : Transform tei to html
- : @param $node data passed to transform
+ : Dynamically build html title based on TEI record and/or sub-module. 
+ : @param $app:id if id is present find TEI title, otherwise use title of sub-module
 :)
-declare function app:tei2html($nodes as node()*) {
-    transform:transform($nodes, doc('../resources/xsl/tei2html.xsl'), 
-    <parameters>
-        <param name="data-root" value="{$config:data-root}"/>
-        <param name="app-root" value="{$config:app-root}"/>
-    </parameters>
-    )
+declare %templates:wrap function app:app-title($node as node(), $model as map(*), $coll as xs:string?){
+if($app:id) then
+   global:tei2html($model("data")/ancestor::tei:TEI/descendant::tei:title[1]/text())
+else if($coll = 'places') then 'The Syriac Gazetteer'  
+else if($coll = 'persons') then 'The Syriac Biographical Dictionary'
+else if($coll = 'q')then 'Gateway to the Syriac Saints'
+else if($coll = 'saints') then 'Gateway to the Syriac Saints: Volume II: Qadishe'
+else if($coll = 'bhse') then 'Gateway to the Syriac Saints: Volume I: Bibliotheca Hagiographica Syriaca Electronica'
+else if($coll = 'spear') then 'A Digital Catalogue of Syriac Manuscripts in the British Library'
+else if($coll = 'mss') then concat('http://syriaca.org/manuscript/',$app:id)
+else 'Syriaca.org: The Syriac Reference Portal '
+};  
+
+(:~
+ : Default title display, used if no sub-module title function. 
+:)
+declare function app:h1($node as node(), $model as map(*)){
+   global:tei2html($model("data")/ancestor::tei:TEI/descendant::tei:title[1])
+}; 
+
+(:~ 
+ : Default record display, used if no sub-module functions. 
+:)
+declare %templates:wrap function app:rec-display($node as node(), $model as map(*), $coll as xs:string?){
+    global:tei2html($model("data")/ancestor::tei:TEI)
 };
 
 declare %templates:wrap function app:set-data($node as node(), $model as map(*), $doc as xs:string){
-    teiDocs:generate-docs($config:data-root || '/places/tei/78.xml')
+    teiDocs:generate-docs($global:data-root || '/places/tei/78.xml')
 };
 
 (:~
@@ -229,7 +251,7 @@ declare function app:transform($nodes as node()*) as item()* {
  : Pull confession data for confessions.html
 :)
 declare %templates:wrap function app:build-confessions($node as node(), $model as map(*)){
-    let $confession := doc($config:data-root || '/documentation/confessions.xml')//tei:body/child::*[1]
+    let $confession := doc($global:data-root || '/documentation/confessions.xml')//tei:body/child::*[1]
     return app:transform($confession)
 };
 
@@ -238,9 +260,9 @@ declare %templates:wrap function app:build-confessions($node as node(), $model a
 :)
 declare function app:get-editors(){
 distinct-values(
-    (for $editors in collection($config:data-root || '/places/tei')//tei:respStmt/tei:name/@ref
+    (for $editors in collection($global:data-root || '/places/tei')//tei:respStmt/tei:name/@ref
      return substring-after($editors,'#'),
-     for $editors-change in collection($config:data-root || '/places/tei')//tei:change/@who
+     for $editors-change in collection($global:data-root || '/places/tei')//tei:change/@who
      return substring-after($editors-change,'#'))
     )
 };
@@ -249,7 +271,7 @@ distinct-values(
  : Build editor list. Sort alphabeticaly
 :)
 declare %templates:wrap function app:build-editor-list($node as node(), $model as map(*)){
-    let $editors := doc($config:app-root || '/documentation/editors.xml')//tei:listPerson
+    let $editors := doc($global:app-root || '/documentation/editors.xml')//tei:listPerson
     for $editor in app:get-editors()
     let $name := 
         for $editor-name in $editors//tei:person[@xml:id = $editor]
