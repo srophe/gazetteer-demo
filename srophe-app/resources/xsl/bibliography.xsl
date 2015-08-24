@@ -302,7 +302,20 @@
         </xsl:choose>
     </xsl:template>  
 
-    
+    <xsl:template match="t:bibl">
+        <xsl:choose>
+            <xsl:when test="t:ptr">
+                <xsl:apply-templates select="t:ptr" mode="biblist"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates mode="biblist"/>
+                <xsl:if test="child::t:citedRange">
+                    <xsl:text>, </xsl:text>
+                    <xsl:apply-templates select="child::t:citedRange"/>                    
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>  
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
      handle a ptr inside a bibl: try to look up the corresponding item
      internally or externally and process that
