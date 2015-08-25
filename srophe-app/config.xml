@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <title>Syriaca.org: Gazetteer App</title>
+    <description>A subset of Syriaca.org including code for gazetteer display only.</description>
+    <contact>info@syriaca.org</contact>
+    <logo>syriaca-logo.png</logo>
+    <url>http://syriaca.org/</url>
+    <app-root>srophe</app-root>
+    <data-root>srophe-data</data-root>
+    <base_uri>http://syriaca.org/</base_uri>
+    <maps>
+        <option>google</option>
+        <option selected="true">leaflet</option>
+    </maps>
+</config>

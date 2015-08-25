@@ -2,24 +2,27 @@ xquery version "3.0";
 (:~
  : Shared functions for search modules 
  :)
-module namespace common="http://syriaca.org//common";
+module namespace common="http://syriaca.org/common";
+import module namespace global="http://syriaca.org/global" at "../lib/global.xqm";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (:~
  : Cleans search parameters to replace bad/undesirable data in strings
  : @param-string parameter string to be cleaned
  : NOTE to self: Need to handle ' in full text search, currently stripped before sent to ft:query() function
- due to difficulties with util:eval;
-replace(replace($param-string, "^\*", ""),"'",'"')     
-replace(replace($param-string, "(^|\W\*)|(^|\W\?)|[&amp;!@#$%^+=_]:", ""),"'",'"')
- replace(replace($text, '&amp;', '&amp;amp;'), '''', '&amp;apos;')
- replace(replace($param-string, "(^|\W\*)|(^|\W\?)|[&amp;!@#$%^+=_]:", ""),"'","")
- 
- 
  :
 :)
 declare function common:clean-string($param-string){
 replace(replace(replace($param-string, "(^|\W\*)|(^|\W\?)|[!@#$%^+=_]:", ""), '&amp;', '&amp;amp;'), '''', '&amp;apos;')
+};
+
+(:~
+ : Strips english titles of non-sort characters as established by Syriaca.org
+ : Used for sorting for browse and search modules
+ : @param $titlestring 
+ :)
+declare function common:build-sort-string($titlestring as xs:string*) as xs:string* {
+    replace(replace(replace(replace($titlestring,'^\s+',''),'^al-',''),'[‘ʻʿ]',''),'On ','')
 };
 
 (:~
@@ -80,7 +83,40 @@ return $final-date
  : Function to truncate description text after first 12 words
  : @param $string
 :)
-declare function common:truncate-sentance($sentance as xs:string*) as xs:string? {
-let $string := string-join($sentance, ' ')
-return concat(string-join(for $word in tokenize($string, '\W+')[position() lt 10] return $word, ' '),'...')
+declare function common:truncate-string($str as xs:string*) as xs:string? {
+let $string := string-join($str, ' ')
+return 
+    if(count(tokenize($string, '\W+')[. != '']) gt 12) then 
+        let $last-words := tokenize($string, '\W+')[position() = 14]
+        return concat(substring-before($string, $last-words),'...')
+    else $string
+};
+
+(: 
+ : Formats search and browse results 
+ : Uses English and Syriac headwords if available, tei:teiHeader/tei:title if no headwords.
+ : Should handle all data types, and eliminate the need for 
+ : data type specific display functions eg: persons:saints-results-node()
+ : @param $node search/browse hits should be either tei:person, tei:place, or tei:body
+ : Used by search.xqm and browse.xqm
+:)
+declare function common:display-recs-short-view($node, $lang) as node()*{
+let $type := if($node/descendant-or-self::tei:place/@type) then string($node/descendant-or-self::tei:place/@type) else ()
+let $uri := 
+        if($node//tei:idno[@type='URI'][starts-with(.,'http://logar.org/')]) then
+                string(replace($node//tei:idno[@type='URI'][starts-with(.,'http://logar.org/')][1],'/tei',''))
+        else string($node//tei:div[1]/@uri)
+let $en-title := $node/ancestor::tei:TEI/descendant::tei:title[1]/text()           
+let $desc :=
+        if($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) then
+            common:truncate-string($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text())
+        else ()
+return
+    <p class="results-list">
+       <a href="{replace($uri,'http://logar.org/','/exist/apps/logar/')}">
+        {($en-title, if($type) then concat(' (',$type,') ') else ())}   
+       </a>
+     <span class="results-list-desc" dir="ltr" lang="en">{concat($desc,' ')}</span>
+     <span class="results-list-desc"><span class="srp-label">URI: </span><a href="{$uri}">{$uri}</a></span>
+    </p>
 };

@@ -2,13 +2,13 @@ xquery version "3.0";
 
 module namespace api="http://syriaca.org/api";
 
-import module namespace geo="http://syriaca.org//geojson" at "lib/geojson.xqm";
-import module namespace feed="http://syriaca.org//atom" at "lib/atom.xqm";
-import module namespace common="http://syriaca.org//common" at "search/common.xqm";
+import module namespace geo="http://syriaca.org/geojson" at "lib/geojson.xqm";
+import module namespace feed="http://syriaca.org/atom" at "lib/atom.xqm";
+import module namespace common="http://syriaca.org/common" at "search/common.xqm";
 (:import module namespace templates="http://exist-db.org/xquery/templates";:)
 import module namespace xqjson="http://xqilla.sourceforge.net/lib/xqjson";
 
-import module namespace config="http://syriaca.org//config" at "config.xqm";
+import module namespace config="http://syriaca.org/config" at "config.xqm";
 
 (: For output annotations  :)
 declare namespace output = "http://www.w3.org/2010/xslt-xquery-serialization";
@@ -76,34 +76,25 @@ function api:get-geo-kml($type as xs:string*, $output as xs:string*) {
   : @param $person limit search to  tei:persName
   : @param $start where to start results list start
   : @param $perpage number of results per page
+      %rest:query-param("place", "{$place}", "")
+    %rest:query-param("person", "{$person}", "")
+    $place as xs:string*,$person as xs:string*,
 :)
 declare
     %rest:GET
     %rest:path("/srophe/api/search")
     %rest:query-param("q", "{$q}", "") 
-    %rest:query-param("place", "{$place}", "")
-    %rest:query-param("person", "{$person}", "")
     %rest:query-param("start", "{$start}", 1)
     %rest:query-param("perpage", "{$perpage}", 25)
     %output:media-type("text/xml")
     %output:method("xml")
-function api:search-api($q as xs:string*,$place as xs:string*,$person as xs:string*, $start as xs:integer*, $perpage as xs:integer*) {
+function api:search-api($q as xs:string*, $start as xs:integer*, $perpage as xs:integer*) {
 (<rest:response> 
   <http:response status="200"> 
     <http:header name="Content-Type" value="application/xml; charset=utf-8"/> 
   </http:response> 
 </rest:response>,
-let $keyword-string := 
-    if(exists($q) and $q != '') then concat("[ft:query(.,'",common:clean-string($q),"',common:options())]")
-    else ()    
-let $place-name := 
-    if(exists($place) and $place != '') then concat("[ft:query(descendant::tei:placeName,'",common:clean-string($place),"',common:options())]")
-    else ()
-let $pers-name := 
-    if(exists($person) and $person != '') then concat("[ft:query(descendant::tei:persName,'",common:clean-string($person),"',common:options())]")
-    else ()
-let $query-string := concat("collection('",$config:data-root,"')//tei:body",$keyword-string,$pers-name,$place-name)
-let $hits := util:eval($query-string)
+let $hits := collection($config:data-root)//tei:body[ft:query(.,$q,common:options())]
 let $total := count($hits)
 return feed:build-atom-feed($hits, $start, $perpage, $q, $total)
 ) 
