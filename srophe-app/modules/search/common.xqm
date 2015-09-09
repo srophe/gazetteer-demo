@@ -103,8 +103,8 @@ return
 declare function common:display-recs-short-view($node, $lang) as node()*{
 let $type := if($node/descendant-or-self::tei:place/@type) then string($node/descendant-or-self::tei:place/@type) else ()
 let $uri := 
-        if($node//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')]) then
-                string(replace($node//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')][1],'/tei',''))
+        if($node//tei:idno[@type='URI'][starts-with(.,$global:base-uri)]) then
+                string(replace($node//tei:idno[@type='URI'][starts-with(.,$global:base-uri)][1],'/tei',''))
         else string($node//tei:div[1]/@uri)
 let $en-title := 
              if($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*) then 

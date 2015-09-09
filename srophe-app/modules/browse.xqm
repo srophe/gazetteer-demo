@@ -136,9 +136,12 @@ else
     </div>
 };
 
+(:
+ : Full page map. 
+:)
 declare function browse:get-map($node as node(), $model as map(*)){
     <div class="col-md-12 map-lg">
-        {geo:build-google-map($model("browse-data")//tei:geo, '', '')}
+        {geo:build-map($model("browse-data")//tei:geo, '', '')}
     </div>
 };
 
