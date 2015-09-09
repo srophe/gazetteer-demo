@@ -14,5 +14,8 @@ declare variable $dir external;
 declare variable $target external;
 
 
-(: Register restxq modules. Should be done automatically, but there seems to be an occasional bug :)
+(: Register restxq modules. Should be done automatically, but there seems to be an occasional bug 
+Error found while processing repo.xml: exerr:ERROR err:XPST0003: 
+EOF or zero-length string found where a valid XPath expression was expected. [at line 18, column 69]
+:)
 xrest:register-module(xs:anyURI($target || '/modules/rest.xqm'))

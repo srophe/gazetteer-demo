@@ -123,7 +123,15 @@ declare function geo:json-transform($geo-search as node()*, $type as xs:string*,
     (:$geo-search:)
 };
 
+(:~
+ : Selects map rendering based on config.xml entry
+:)
 declare function geo:build-map($geo-search as node()*, $type as xs:string*, $output as xs:string*){
+if($global:app-map-option = 'google') then geo:build-google-map($geo-search, $type, $output)
+else geo:build-leaflet-map($geo-search, $type, $output)
+};
+
+declare function geo:build-leaflet-map($geo-search as node()*, $type as xs:string*, $output as xs:string*){
     <div id="map-data" style="margin-bottom:3em;">
         <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js?2"/>
         <script src="http://isawnyu.github.com/awld-js/lib/requirejs/require.min.js" type="text/javascript"/>

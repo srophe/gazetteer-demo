@@ -9,10 +9,10 @@ xquery version "3.0";
 
 module namespace browse="http://syriaca.org/browse";
 
-import module namespace global="http://syriaca.org/global" at "lib/global.xqm";
 import module namespace common="http://syriaca.org/common" at "search/common.xqm";
 import module namespace geo="http://syriaca.org/geojson" at "lib/geojson.xqm";
-import module namespace templates="http://exist-db.org/xquery/templates";
+import module namespace templates="http://syriaca.org/templates" at "templates.xql";
+import module namespace global="http://syriaca.org/global" at "lib/global.xqm";
 
 declare namespace xslt="http://exist-db.org/xquery/transform";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -43,9 +43,9 @@ declare variable $browse:fq {request:get-parameter('fq', '')};
 :)
 declare function browse:get-all($node as node(), $model as map(*), $coll as xs:string?){
 let $browse-path :=  
-    if($coll = 'places') then concat("collection('",$config:data-root,"/places/tei')//tei:place",browse:get-syr())
-    else if(exists($coll)) then concat("collection('",$config:data-root,xs:anyURI($coll),"')//tei:body",browse:get-syr())
-    else concat("collection('",$config:data-root,"')//tei:body",browse:get-syr())
+    if($coll = 'places') then concat("collection('",$global:data-root,"/places/tei')//tei:place",browse:get-syr())
+    else if(exists($coll)) then concat("collection('",$global:data-root,xs:anyURI($coll),"')//tei:body",browse:get-syr())
+    else concat("collection('",$global:data-root,"')//tei:body",browse:get-syr())
 return 
     map{"browse-data" := util:eval($browse-path)}        
 };
@@ -121,10 +121,7 @@ if($browse:view = 'type' or $browse:view = 'date') then
                  <ul>{browse:get-data($node,$model,$coll)}</ul>)
             else <h3>Select Date</h3>  
         else ()}</div>)
-else if($browse:view = 'map') then
-    <div class="col-md-12 map-lg">
-        {geo:build-google-map($model("browse-data")//tei:geo, '', '')}
-    </div>
+else if($browse:view = 'map') then browse:get-map($node, $model)
 else 
     <div class="col-md-12">
         { (
@@ -136,6 +133,12 @@ else
         </div>
         )
         }
+    </div>
+};
+
+declare function browse:get-map($node as node(), $model as map(*)){
+    <div class="col-md-12 map-lg">
+        {geo:build-google-map($model("browse-data")//tei:geo, '', '')}
     </div>
 };
 

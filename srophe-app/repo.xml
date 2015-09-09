@@ -10,5 +10,5 @@
     <target>geo</target>
     <prepare>pre-install.xql</prepare>
     <finish>post-install.xql</finish>
-    <deployed>2015-06-15T09:59:27.02-04:00</deployed>
+    <deployed>2015-09-08T12:27:51.141-04:00</deployed>
 </meta>

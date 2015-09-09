@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" data-template="place:get-rec" coll="places">
+<html xmlns="http://www.w3.org/1999/xhtml" data-template="place:get-rec">
     <head>
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title data-template="place:app-title">Syriaca.org: Gazetteer Demo app</title>
-        <!-- DC -->
         <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"/>
         <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/"/>
         <meta name="DC.subject" property="dc.subject" content="Geography, Ancient"/>
         <meta name="DC.type" property="dc.type" content="Text"/>
-        <meta name="DC.isPartOf" property="dc.ispartof" content="Syriaca.org: The Syriac Reference Portal"/>
+        <meta name="DC.isPartOf" property="dc.ispartof" content="Logar: Linked Open Gazetteer of the Andean Region"/>
         <meta name="DC.isPartOf" property="dc.ispartof" content="The Syriac Gazetteer"/>
-        <!-- Styles -->
+        <!--<link rel="shortcut icon" href="/exist/apps/srophe/resources/img/gazetteer.ico"/>-->
         <link rel="stylesheet" type="text/css" href="$app-root/resources/css/bootstrap.min.css"/>
         <link rel="stylesheet" type="text/css" href="$app-root/resources/css/main.css"/>
+        <link rel="stylesheet" type="text/css" href="$app-root/resources/css/map.css"/>
         <link rel="stylesheet" type="text/css" media="print" href="$app-root/resources/css/print.css"/>
         <!--<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js?2"/>-->
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"/>
@@ -34,7 +34,7 @@
                         <span class="icon-bar"/>
                     </button>
                     <a class="navbar-brand" href="$app-root/index.html">
-                        <img alt="Gazetteer Logo" src="$app-root/resources/img/syriaca-logo.png"/>
+                        <img alt="Gazetteer Demo App" src="$app-root/resources/img/syriaca-logo.png"/>
                     </a>
                 </div>
                 <div class="navbar-collapse collapse pull-right">
@@ -74,26 +74,10 @@
             </div>
         </div>
         <div id="main">
-            <div id="content" class="container well well-white"/>
+            <div id="content"/>
         </div>
-        <!-- Footer -->
-        <footer>
-            <div class="container">
-                <a rel="license" href="http://creativecommons.org/licenses/by/3.0/deed.en_US">
-                    <img alt="Creative Commons License" style="border-width:0" src="/exist/apps/srophe/resources/img/cc.png" height="18px"/>
-                </a> This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/deed.en_US">Creative Commons Attribution 3.0 Unported License</a>.
-                <br/>Copyright Vanderbilt University, Princeton University, and the Contributor(s), 2014.
-            </div>
-        </footer>
-        
         <!-- Additional Javascript -->
         <script type="text/javascript" src="$app-root/resources/js/bootstrap.min.js"/>
         <script type="text/javascript" src="$app-root/resources/js/jquery.validate.min.js"/>
-        <script>
-            var _gaq=[['_setAccount',''],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
-        </script>
     </body>
 </html>

@@ -300,8 +300,7 @@
                 <xsl:apply-templates mode="biblist"/>
             </xsl:otherwise>
         </xsl:choose>
-    </xsl:template>  
-
+    </xsl:template>
     <xsl:template match="t:bibl">
         <xsl:choose>
             <xsl:when test="t:ptr">
@@ -311,7 +310,7 @@
                 <xsl:apply-templates mode="biblist"/>
                 <xsl:if test="child::t:citedRange">
                     <xsl:text>, </xsl:text>
-                    <xsl:apply-templates select="child::t:citedRange"/>                    
+                    <xsl:apply-templates select="child::t:citedRange"/>
                 </xsl:if>
             </xsl:otherwise>
         </xsl:choose>

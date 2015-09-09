@@ -13,6 +13,7 @@ import module namespace templates="http://exist-db.org/xquery/templates" ;
 
 declare namespace xslt="http://exist-db.org/xquery/transform";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace html="http://www.w3.org/1999/xhtml";
 
 declare namespace transform="http://exist-db.org/xquery/transform";
 
@@ -21,6 +22,7 @@ declare namespace transform="http://exist-db.org/xquery/transform";
  :)
 declare variable $place:id {request:get-parameter('id', '')};
 declare variable $place:status {request:get-parameter('status', '')};
+
 
 (:~ 
  : Simple get record function, retrieves tei record based on idno
@@ -45,6 +47,13 @@ if($place:id) then
    global:tei2html($model("data")/descendant::tei:placeName[1]/text())
 else 'The Syriac Gazetteer' 
 };  
+
+declare
+    %templates:wrap
+function place:fix-links($node as node(), $model as map(*)) {
+    templates:process(global:fix-links($node/node()), $model)
+};
+
 
 
 (:
