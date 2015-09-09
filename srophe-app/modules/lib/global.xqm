@@ -27,9 +27,11 @@ declare variable $global:data-root :=
        replace($global:app-root, $app-root, $data-root)
     ;
 
-declare variable $global:url-root := 
+declare variable $global:nav-base := 
     if($global:get-config//nav-base/text() != '') then $global:get-config//nav-base/text()
     else concat('/exist/apps/',$global:app-root);
+
+declare variable $global:base-uri := $global:get-config//base_uri/text();
 
 declare variable $global:app-logo := $global:get-config//logo/text();
 
@@ -44,13 +46,13 @@ declare function global:fix-links($nodes as node()*) {
     return
         typeswitch($node)
             case element(html:a) return
-                let $href := replace($node/@href, "\$app-root", $global:url-root)
+                let $href := replace($node/@href, "\$app-root", $global:nav-base)
                 return
                     <a href="{$href}">
                         {$node/@* except $node/@href, $node/node()}
                     </a>
             case element(html:form) return
-                let $action := replace($node/@action, "\$app-root", $global:url-root)
+                let $action := replace($node/@action, "\$app-root", $global:nav-base)
                 return
                     <form action="{$action}">
                         {$node/@* except $node/@action, $node/node()}

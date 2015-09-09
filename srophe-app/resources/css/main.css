@@ -185,9 +185,39 @@ h4 {font-size: 1em; margin-top:1em;}
 }
 
 /* styles for languages and scripts */
+/* styles for languages and scripts */
 
 :lang(en) {
 	font-family: arial, sans-serif;
+}
+
+:lang(syr),:lang(syc) {
+ font-family: "EstrangeloEdessa", "Estrangelo Edessa", Verdana, Arial, Helvetica, sans-serif;
+  /*font-size:large;*/
+  font-size:1.25em; 
+  line-height:1em;
+  
+}
+
+:lang(syr-Syrj), :lang(syc-Syrj) {
+ font-family: "SertoBatnan", "Serto Batnan", Verdana, Arial, Helvetica, sans-serif;
+  font-size:1.25em; 
+  line-height:1em;
+ 
+}
+
+:lang(syr-Syre), :lang(syc-Syre) {
+ font-family: "EastSyriacAdiabene", "East Syriac Adiabene", Verdana, Arial, Helvetica, sans-serif;
+ font-size:1.25em; 
+ line-height:1em;
+
+}
+
+:lang(ar) {
+ font-family: arial, sans-serif;
+ font-size:1.25em; 
+ line-height:1em;
+ 
 }
 
 /* Browse tabs and side menues */  	

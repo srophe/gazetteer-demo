@@ -17,7 +17,7 @@
     <!-- eXist app root for gazetteer data -->
     <data-root>srophe-data</data-root>
     <!-- Base URI for identifiers in app data -->
-    <base_uri>http://syriaca.org/</base_uri>
+    <base_uri>http://syriaca.org</base_uri>
     <!-- Map rendering -->
     <maps>
         <option>google</option>

@@ -103,20 +103,44 @@ return
 declare function common:display-recs-short-view($node, $lang) as node()*{
 let $type := if($node/descendant-or-self::tei:place/@type) then string($node/descendant-or-self::tei:place/@type) else ()
 let $uri := 
-        if($node//tei:idno[@type='URI'][starts-with(.,'http://logar.org/')]) then
-                string(replace($node//tei:idno[@type='URI'][starts-with(.,'http://logar.org/')][1],'/tei',''))
+        if($node//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')]) then
+                string(replace($node//tei:idno[@type='URI'][starts-with(.,'http://syriaca.org/')][1],'/tei',''))
         else string($node//tei:div[1]/@uri)
-let $en-title := $node/ancestor::tei:TEI/descendant::tei:title[1]/text()           
+let $en-title := 
+             if($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*) then 
+                 string-join($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/child::*/text(),' ')
+             else if(string-join($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text())) then 
+                string-join($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^en')][1]/text(),' ')   
+             else $node/ancestor::tei:TEI/descendant::tei:title[1]/text()       
+let $syr-title := 
+             if($node/descendant::*[@syriaca-tags='#syriaca-headword'][1]) then
+                if($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/child::*) then 
+                 string-join($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/child::*/text(),' ')
+                else string-join($node/descendant::*[@syriaca-tags='#syriaca-headword'][matches(@xml:lang,'^syr')][1]/text(),' ')
+             else 'NA'     
 let $desc :=
         if($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text()) then
             common:truncate-string($node/descendant::*[starts-with(@xml:id,'abstract')]/descendant-or-self::text())
         else ()
 return
     <p class="results-list">
-       <a href="{replace($uri,'http://logar.org/','/exist/apps/logar/')}">
-        {($en-title, if($type) then concat(' (',$type,') ') else ())}   
+       <a href="{replace($uri,$global:base-uri,$global:nav-base)}">
+        {
+        if($lang = 'syr') then
+            (<span dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</span>,' - ', 
+            <span dir="ltr">
+            {($en-title, if($type) then concat('(',$type,')') else ())}
+            </span>)
+        else
+        ($en-title,
+          if($type) then concat('(',$type,')') else (),
+            if($syr-title) then 
+                if($syr-title = 'NA') then ()
+                else (' - ', <span dir="rtl" lang="syr" xml:lang="syr">{$syr-title}</span>)
+          else ' - [Syriac Not Available]')
+          }   
        </a>
-     <span class="results-list-desc" dir="ltr" lang="en">{concat($desc,' ')}</span>
+     <span class="results-list-desc">{concat($desc,' ')}</span>
      <span class="results-list-desc"><span class="srp-label">URI: </span><a href="{$uri}">{$uri}</a></span>
     </p>
 };
