@@ -141,6 +141,6 @@ return
           }   
        </a>
      <span class="results-list-desc">{concat($desc,' ')}</span>
-     <span class="results-list-desc"><span class="srp-label">URI: </span><a href="{$uri}">{$uri}</a></span>
+     <span class="results-list-desc"><span class="srp-label">URI: </span><a href="{replace($uri,$global:base-uri,$global:nav-base)}">{$uri}</a></span>
     </p>
 };
