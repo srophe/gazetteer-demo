@@ -21,7 +21,7 @@ declare namespace transform="http://exist-db.org/xquery/transform";
  : @param $rec-type place type
  : @param $title place title
 :)
-declare function geo:build-json($geo as xs:string, $id as xs:string, $rec-type as xs:string, $title as xs:string, $rec-rel as xs:string) as element(features){    
+declare function geo:build-json($geo as xs:string*,$id as xs:string*, $rec-type as xs:string*, $title as xs:string*, $rec-rel as xs:string*) as element(features){    
     <item type="object">
         <pair name="type"  type="string">Feature</pair>
         <pair name="geometry"  type="object">
@@ -74,7 +74,7 @@ declare function geo:get-coordinates($geo-search as element()*, $type as xs:stri
     for $place-name in map:get($geo-map, 'geo-data')
     let $id := string($place-name/ancestor::tei:place/tei:idno[@type='URI'][starts-with(.,$global:base-uri)])
     let $rec-type := string($place-name/ancestor::tei:place/@type)
-    let $title := $place-name/ancestor::tei:place/tei:placeName[@xml:lang = 'en'][1]/text()
+    let $title := $place-name/ancestor::tei:TEI/descendant::tei:title[1]/text()
     let $geo := $place-name
     let $rel := string($place-name/ancestor::*:relation/@name)
     return
@@ -257,7 +257,7 @@ declare function geo:build-google-map($geo-search as node()*, $type as xs:string
             
             function initialize(){
                 map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 2,
+                    maxZoom: 10,
                     center: new google.maps.LatLng(0,0),
                     mapTypeId: google.maps.MapTypeId.TERRAIN
                 });
