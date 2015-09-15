@@ -14,8 +14,41 @@ declare namespace xlink = "http://www.w3.org/1999/xlink";
 :)
 declare variable $app:id {request:get-parameter('id', '')}; 
 
+(:~
+ : Traverse main nav and "fix" links based on values in config.xml 
+:)
+declare
+    %templates:wrap
+function app:fix-links($node as node(), $model as map(*)) {
+    templates:process(app:fix-links($node/node()), $model)
+};
+
+declare function app:fix-links($nodes as node()*) {
+    for $node in $nodes
+    return
+        typeswitch($node)
+            case element(a) return
+                let $href := replace($node/@href, "\$app", concat("/exist/apps/",$global:app-root))
+                return
+                    <a href="{$href}">
+                        {$node/@* except $node/@href, $node/node()}
+                    </a>
+            case element() return
+                element { node-name($node) } {
+                    $node/@*, app:fix-links($node/node())
+                }
+            default return
+                $node
+};
+
+(:
+subnav.xml
+:)
+declare %templates:wrap function app:get-nav($node as node(), $model as map(*)){
+ doc($global:data-root || 'templates/subnav.xml')/child::*
+};
 (:~  
- : Simple get record function, retrieves tei record based on idno
+ : Simple get record function, get tei record based on idno
  : @param $app:id syriaca.org uri 
 :)
 declare function app:get-rec($node as node(), $model as map(*), $coll as xs:string?) {
@@ -23,10 +56,6 @@ if($app:id) then
     let $id :=
         if(contains(request:get-uri(),'http://syriaca.org/')) then $app:id
         else if($coll = 'places') then concat('http://syriaca.org/place/',$app:id) 
-        else if(($coll = 'persons') or ($coll = 'saints') or ($coll = 'authors')) then concat('http://syriaca.org/person/',$app:id)
-        else if($coll = 'bhse') then concat('http://syriaca.org/work/',$app:id)
-        else if($coll = 'spear') then concat('http://syriaca.org/spear/',$app:id)
-        else if($coll = 'mss') then concat('http://syriaca.org/manuscript/',$app:id)
         else $app:id
     return map {"data" := collection($global:data-root)//tei:idno[@type='URI'][. = $id]}
 else map {"data" := 'Page data'}    
@@ -40,12 +69,6 @@ declare %templates:wrap function app:app-title($node as node(), $model as map(*)
 if($app:id) then
    global:tei2html($model("data")/ancestor::tei:TEI/descendant::tei:title[1]/text())
 else if($coll = 'places') then 'The Syriac Gazetteer'  
-else if($coll = 'persons') then 'The Syriac Biographical Dictionary'
-else if($coll = 'q')then 'Gateway to the Syriac Saints'
-else if($coll = 'saints') then 'Gateway to the Syriac Saints: Volume II: Qadishe'
-else if($coll = 'bhse') then 'Gateway to the Syriac Saints: Volume I: Bibliotheca Hagiographica Syriaca Electronica'
-else if($coll = 'spear') then 'A Digital Catalogue of Syriac Manuscripts in the British Library'
-else if($coll = 'mss') then concat('http://syriaca.org/manuscript/',$app:id)
 else 'Syriaca.org: The Syriac Reference Portal '
 };  
 

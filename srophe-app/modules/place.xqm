@@ -31,8 +31,8 @@ declare variable $place:status {request:get-parameter('status', '')};
 declare function place:get-rec($node as node(), $model as map(*)) {
 if($place:id) then 
     let $id :=
-        if(contains(request:get-uri(),'http://syriaca.org/')) then $place:id
-        else if(contains(request:get-uri(),'/geo/') or contains(request:get-uri(),'/place/')) then concat('http://syriaca.org/place/',$place:id) 
+        if(contains(request:get-uri(),$global:base-uri)) then $place:id
+        else if(contains(request:get-uri(),'/geo/') or contains(request:get-uri(),'/place/')) then concat($global:base-uri,'/',$place:id) 
         else $place:id
     return map {"data" := collection($global:data-root)//tei:idno[@type='URI'][. = $id]/ancestor::tei:TEI}
 else map {"data" := 'Page data'} 
@@ -48,22 +48,23 @@ if($place:id) then
 else 'The Syriac Gazetteer' 
 };  
 
+(:~
+ : Traverse main nav and "fix" links based on values in config.xml 
+:)
 declare
     %templates:wrap
 function place:fix-links($node as node(), $model as map(*)) {
     templates:process(global:fix-links($node/node()), $model)
 };
 
-
-
-(:
+(:~ 
  : Pass necessary element to h1 xslt template
 :)
 declare %templates:wrap function place:h1($node as node(), $model as map(*)){
     let $title := $model("data")//tei:place
     let $title-nodes := 
-            <srophe-title xmlns="http://www.tei-c.org/ns/1.0">
-                {($title//tei:placeName[@syriaca-tags='#syriaca-headword'],$title/descendant::tei:idno, $title/descendant::tei:location)}
+           <srophe-title xmlns="http://www.tei-c.org/ns/1.0">
+                {($title/ancestor::tei:TEI//tei:titleStmt/tei:title[1], $title/descendant::tei:idno, $title/descendant::tei:location/tei:geo)}
             </srophe-title>
     return global:tei2html($title-nodes)
 };
@@ -167,7 +168,7 @@ declare %templates:wrap function place:events($node as node(), $model as map(*))
  :           </location>       
 :)
 declare function place:nested-loc($node as node(), $model as map(*)){
-    let $ref-id := concat('http://syriaca.org/place/',$place:id)
+    let $ref-id := concat($global:base-uri,'/',$place:id)
     return 
         global:tei2html(<place xmlns="http://www.tei-c.org/ns/1.0">
         {
