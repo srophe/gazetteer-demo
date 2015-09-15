@@ -39,7 +39,7 @@ declare variable $global:app-map-option := $global:get-config//maps/option[@sele
 
 (:
  : Addapted from https://github.com/eXistSolutions/hsg-shell
- : Recorse through menu output absolute urls based on config.xml values. 
+ : Recurse through menu output absolute urls based on config.xml values. 
 :)
 declare function global:fix-links($nodes as node()*) {
     for $node in $nodes

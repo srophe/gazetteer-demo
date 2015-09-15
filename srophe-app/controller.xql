@@ -1,4 +1,5 @@
 xquery version "3.0";
+import module namespace global="http://syriaca.org/global" at "modules/lib/global.xqm";
 
 declare variable $exist:path external;
 declare variable $exist:resource external;
@@ -31,16 +32,14 @@ else if(matches($exist:resource,"^[0-9]+$") or matches($exist:resource,"^(.[1-9]
             <forward url="{$exist:controller}{$html-path}"></forward>
                 <view>
                     <forward url="{$exist:controller}/modules/view.xql">
-                        {if(starts-with($exist:path, "/work/")) then <add-parameter name="id" value="{concat('http://syriaca.org/work/',$id)}"/>
-                         else <add-parameter name="id" value="{$id}"/>
-                        }
+                        <add-parameter name="id" value="{$id}"/>
                     </forward>
                 </view>
                 <error-handler>
                     <forward url="{$exist:controller}/error-page.html" method="get"/>
                     <forward url="{$exist:controller}/modules/view.xql"/>
                 </error-handler>
-         </dispatch>        
+         </dispatch>       
 else if (contains($exist:path,'/api/')) then
   if (ends-with($exist:path,"/")) then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
