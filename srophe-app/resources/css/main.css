@@ -1,21 +1,21 @@
 /* Application styles could go here */
 /*
  * Colors:
- * Dark red: 753C28
- * Dark orange: B3522B
- * Light orange: E69849
- * Pale tan: F5F2E9
  * Dark Blue: 456889
  * Blue/grey: A2B1B9
  * Light Blue: DDEAF1
  * Dark Grey #333
  * Light Grey (text): #999
  */
+
+/* Import Font css */ 
+ @import url("syr-font-families.css");
+
+/* Main content blocks */
  
 body {background-color:#385978;}
 #main {background-color:#999;}
 
-/* Main content blocks */
 .navbar {border-bottom:4px solid #456889 !important;}
 .navbar-inner {border-bottom:.5em solid #456889 !important;}
 .navbar-inner .container{height: 45px !important; padding-top:.5em; margin-left:.5em;}
@@ -120,7 +120,7 @@ h4 {font-size: 1em; margin-top:1em;}
 .section.type ul {padding-left:0;}
 
 /* Browse page styles */
-.syr-list{padding-right:7em; padding-top:2em;}
+.syr-list{padding-right:7em; padding-top:2em; text-align: right;}
 .en-list{padding-left:5em; padding-top:2em;}
 .browse-alpha {border-bottom:1px solid #ccc; padding-left:1em; padding:0; margin-bottom:1em; text-align: justify;}
 
@@ -138,13 +138,16 @@ h4 {font-size: 1em; margin-top:1em;}
       background-color: #eee;
       cursor: pointer;
     }
+
 .browse-map {margin:0;}
 .inline-map {margin-left:-2em; margin-bottom:1em;}
 .map-lg #map {height:400px !important;}
 .map-md #map {height:300px !important;}
 .map-sm #map {height:250px !important;} 
 .results-list {margin-left: 25px; border-bottom:1px dotted #eee; padding-top:.5em}
-.results-list-desc{display:block;padding-left:1.5em;}
+.results-list-desc{display:block;}
+.results-list-desc .pers-label {background-color:#eee;}
+.results-list-desc .pers-label .footnote-refs {display:none;}
 /* footnote styles */
 .footnote-refs, .footnote-tgt {
     font-size: .7em;
@@ -184,7 +187,6 @@ h4 {font-size: 1em; margin-top:1em;}
  font-weight: bold;
 }
 
-/* styles for languages and scripts */
 /* styles for languages and scripts */
 
 :lang(en) {
@@ -522,3 +524,4 @@ pre {
 .api-param {width:20%}
 .api-desc {width:55%}
 .api-method {width:10%}
+

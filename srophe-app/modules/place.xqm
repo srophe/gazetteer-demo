@@ -32,7 +32,7 @@ declare function place:get-rec($node as node(), $model as map(*)) {
 if($place:id) then 
     let $id :=
         if(contains(request:get-uri(),$global:base-uri)) then $place:id
-        else if(contains(request:get-uri(),'/geo/') or contains(request:get-uri(),'/place/')) then concat($global:base-uri,'/',$place:id) 
+        else if(contains(request:get-uri(),'/geo/') or contains(request:get-uri(),'/place/')) then concat($global:base-uri,'/place/',$place:id) 
         else $place:id
     return map {"data" := collection($global:data-root)//tei:idno[@type='URI'][. = $id]/ancestor::tei:TEI}
 else map {"data" := 'Page data'} 

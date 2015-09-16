@@ -376,3 +376,12 @@ declare  %templates:wrap function browse:build-tabs-map($node, $model){
          else '' }<a href="browse.html?view=map">Map</a>
     </li>
 };
+
+declare  %templates:wrap function browse:other-formats($node, $model, $coll){
+<ul>
+    <li><a href="/exist/restxq/{replace($global:app-root,'/db/apps/','')}/api/{$coll}/atom" rel="alternate" type="application/atom+xml" title="full set of records from the Syriac Gazetteer in Atom XML format">Atom xml</a></li>
+    <li><a href="/exist/restxq/{replace($global:app-root,'/db/apps/','')}/api/geo/json" rel="alternate" type="application/atom+xml" title="full set of records from the Syriac Gazetteer in GeoJSON">GeoJSON</a></li>
+    <li><a href="/exist/restxq/{replace($global:app-root,'/db/apps/','')}/api/geo/kml" rel="alternate" type="application/atom+xml" title="full set of records from the Syriac Gazetteer in KML format">KML</a></li>
+</ul>
+
+}; 

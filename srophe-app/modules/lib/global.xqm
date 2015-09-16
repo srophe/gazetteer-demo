@@ -35,6 +35,10 @@ declare variable $global:base-uri := $global:get-config//base_uri/text();
 
 declare variable $global:app-logo := $global:get-config//logo/text();
 
+declare variable $global:app-title := $global:get-config//title/text();
+
+declare variable $global:app-url := $global:get-config//url/text();
+
 declare variable $global:app-map-option := $global:get-config//maps/option[@selected='true']/text();
 
 (:
@@ -74,6 +78,7 @@ declare function global:tei2html($nodes as node()*) {
     <parameters>
         <param name="data-root" value="{$global:data-root}"/>
         <param name="app-root" value="{$global:app-root}"/>
+        <param name="base-uri" value="{$global:base-uri}"/>
     </parameters>
     )
 };

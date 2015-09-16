@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta xmlns="http://exist-db.org/xquery/repo">
-    <description>Syriaca.org: Gazetteer</description>
-    <author>Winona Salesky</author>
+    <description>Syriaca.org: Gazetteer Demo</description>
+    <author>Syriaca.org</author>
     <website>http://syriaca.org/</website>
     <status>beta</status>
     <license>GNU-LGPL</license>
@@ -9,6 +9,5 @@
     <type>application</type>
     <target>geo</target>
     <prepare>pre-install.xql</prepare>
-    <finish>post-install.xql</finish>
-    <deployed>2015-09-08T12:27:51.141-04:00</deployed>
+    <!--<finish>post-install.xql</finish>-->
 </meta>

@@ -9,6 +9,7 @@ module namespace timeline="http://syriaca.org/timeline";
 :)
 import module namespace json="http://www.json.org";
 import module namespace xqjson="http://xqilla.sourceforge.net/lib/xqjson";
+import module namespace global="http://syriaca.org/global" at "global.xqm";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
@@ -54,8 +55,8 @@ return
             <pair name="type" type="string">default</pair>
             <pair name="text" type="string"></pair>
             <pair name="asset" type="object">
-                <pair name="media" type="string">syriaca.org</pair>
-                <pair name="credit" type="string">Syriaca.org</pair>
+                <pair name="media" type="string">{$global:app-url}</pair>
+                <pair name="credit" type="string">{$global:app-title}</pair>
                 <pair name="caption" type="string">Events for {$timeline-title}</pair>
             </pair>  
             <pair name="date" type="array">

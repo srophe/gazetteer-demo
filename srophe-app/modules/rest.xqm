@@ -98,8 +98,6 @@ return feed:build-atom-feed($hits, $start, $perpage, $q, $total)
 ) 
 };
 
-
-
 (:~
   : Use resxq to format urls for tei
   : @param $collection syriaca.org subcollection 
@@ -108,7 +106,7 @@ return feed:build-atom-feed($hits, $start, $perpage, $q, $total)
 :)
 declare 
     %rest:GET
-    %rest:path("/{$collection}/{$id}/tei")
+    %rest:path("/geo/{$collection}/{$id}/tei")
     %output:media-type("text/xml")
     %output:method("xml")
 function api:get-tei($collection as xs:string, $id as xs:string){
@@ -122,29 +120,6 @@ function api:get-tei($collection as xs:string, $id as xs:string){
 }; 
 
 (:~
-  : NOTE this does means the above no longer works...
-  : Use resxq to format urls for spear tei
-  : @param $collection syriaca.org subcollection 
-  : @param $id record id
-  : Serialized as XML
-
-declare 
-    %rest:GET
-    %rest:path("/spear/{$type}/{$id}/tei")
-    %output:media-type("text/xml")
-    %output:method("xml")
-function api:get-tei($type as xs:string, $id as xs:string){
-   (<rest:response> 
-      <http:response status="200"> 
-        <http:header name="Content-Type" value="application/xml; charset=utf-8"/> 
-      </http:response> 
-    </rest:response>, 
-     api:get-spear-tei($type, $id)
-     )
-}; 
-:)
-
-(:~
   : Return atom feed for single record
   : @param $collection syriaca.org subcollection 
   : @param $id record id
@@ -152,7 +127,7 @@ function api:get-tei($type as xs:string, $id as xs:string){
 :)
 declare 
     %rest:GET
-    %rest:path("/{$collection}/{$id}/atom")
+    %rest:path("/geo/{$collection}/{$id}/atom")
     %output:media-type("application/atom+xml")
     %output:method("xml")
 function api:get-atom-record($collection as xs:string, $id as xs:string){
@@ -183,7 +158,7 @@ function api:get-atom-feed($collection as xs:string, $start as xs:integer*, $per
         <http:header name="Content-Type" value="application/xml; charset=utf-8"/> 
       </http:response> 
     </rest:response>, 
-    let $feed := collection(xs:anyURI($global:data-root || $collection ))//tei:TEI
+    let $feed := collection(xs:anyURI($global:data-root || '/' || $collection))//tei:TEI
     let $total := count($feed)
     return
      feed:build-atom-feed($feed, $start, $perpage,'',$total)
@@ -220,20 +195,9 @@ function api:get-atom-feed($start as xs:integer*, $perpage as xs:integer*){
 declare function api:get-tei-rec($collection as xs:string, $id as xs:string) as node()*{
     let $collection-name := 
         if($collection = 'place') then 'places'
-        else if($collection = 'person') then 'persons'
         else $collection
     let $path := (xs:anyURI($global:data-root) || '/' || $collection-name || '/tei/' || $id ||'.xml')
-    return 
-        if($collection='spear') then 
-            let $spear-id := concat('http://syriaca.org/spear/',$id)
-            return
-             <tei:TEI xmlns="http://www.tei-c.org/ns/1.0">
-                {
-                    for $rec in collection(xs:anyURI($global:data-root) || '/spear/tei')//tei:div[@uri=$spear-id]
-                    return $rec
-                }
-             </tei:TEI>
-        else doc($path)/child::*
+    return doc($path)/child::*
 };
 
 (:~
