@@ -59,7 +59,7 @@ declare function global:fix-links($nodes as node()*) {
                 let $action := replace($node/@action, "\$app-root", $global:nav-base)
                 return
                     <form action="{$action}">
-                        {$node/@* except $node/@action, $node/node()}
+                        {$node/@* except $node/@action, global:fix-links($node/node())}
                     </form> 
             case element() return
                 element { node-name($node) } {
